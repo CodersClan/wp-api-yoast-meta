@@ -153,6 +153,7 @@ class Yoast_To_REST_API {
 			'yoast_wpseo_company_logo'         => $yoast_titles['company_logo'] ?? '',
 			'yoast_wpseo_website_name'         => $yoast_titles['website_name'] ?? '',
 			'yoast_wpseo_social_defaults'      => get_option( 'wpseo_social' ),
+			'yoast_wpseo_primary_category'     => get_post_meta( $p['id'], '_yoast_wpseo_primary_category-name', true ),
 		);
 
 		/**
