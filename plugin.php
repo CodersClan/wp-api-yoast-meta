@@ -2,10 +2,10 @@
 /**
  * Plugin Name: Yoast to REST API
  * Description: Adds Yoast fields to page and post metadata to WP REST API responses
- * Author: Niels Garve, Pablo Postigo, Tedy Warsitha, Charlie Francis
+ * Author: Niels Garve, Pablo Postigo, Tedy Warsitha, Charlie Francis (Forked and edited by BadGoat)
  * Author URI: https://github.com/niels-garve
- * Version: 1.4.2
- * Plugin URI: https://github.com/niels-garve/yoast-to-rest-api
+ * Version: 1.4.8
+ * Plugin URI: https://github.com/CodersClan/wp-api-yoast-meta
  */
 class Yoast_To_REST_API {
 
@@ -120,9 +120,6 @@ class Yoast_To_REST_API {
 	}
 
 	function wp_api_encode_yoast( $p, $field_name, $request ) {
-		$wpseo_frontend = WPSEO_Frontend_To_REST_API::get_instance();
-		$wpseo_frontend->reset();
-
 		query_posts(
 			array(
 				'p'         => $p['id'], // ID of a page, post, or custom type
@@ -132,13 +129,10 @@ class Yoast_To_REST_API {
 
 		the_post();
 
-		// title options — defaults.
-		$yoast_titles = get_option( 'wpseo_titles' );
-
 		$yoast_meta = array(
-			'yoast_wpseo_title'                => $wpseo_frontend->get_content_title() ?? '',
-			'yoast_wpseo_metadesc'             => $wpseo_frontend->metadesc( false ) ?? '',
-			'yoast_wpseo_canonical'            => $wpseo_frontend->canonical( false ) ?? '',
+			'yoast_wpseo_title'                => YoastSEO()->meta->for_post( $p['id'] )->title ?? '',
+			'yoast_wpseo_metadesc'             => YoastSEO()->meta->for_post( $p['id'] )->description ?? '',
+			'yoast_wpseo_canonical'            => YoastSEO()->meta->for_post( $p['id'] )->canonical ?? '',
 			'yoast_wpseo_facebook_title'       => get_post_meta( $p['id'], '_yoast_wpseo_opengraph-title', true ),
 			'yoast_wpseo_facebook_description' => get_post_meta( $p['id'], '_yoast_wpseo_opengraph-description', true ),
 			'yoast_wpseo_facebook_type'        => $p['type'] ?? '',
@@ -154,6 +148,9 @@ class Yoast_To_REST_API {
 			'yoast_wpseo_website_name'         => $yoast_titles['website_name'] ?? '',
 			'yoast_wpseo_social_defaults'      => get_option( 'wpseo_social' ),
 			'yoast_wpseo_primary_category'     => get_post_meta( $p['id'], '_yoast_wpseo_primary_category-name', true ),
+			'yoast_wpseo_meta-robots_noindex'  => filter_var(get_post_meta( $p['id'], '_yoast_wpseo_meta-robots-noindex', true ), FILTER_VALIDATE_BOOLEAN),
+			'yoast_wpseo_meta-robots_nofollow' => filter_var(get_post_meta( $p['id'], '_yoast_wpseo_meta-robots-nofollow', true ), FILTER_VALIDATE_BOOLEAN),
+			'yoast_wpseo_meta-robots_adv'      => get_post_meta( $p['id'], '_yoast_wpseo_meta-robots-adv', true ),
 		);
 
 		/**
